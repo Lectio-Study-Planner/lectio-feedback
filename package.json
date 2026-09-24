@@ -1,0 +1,10 @@
+{
+  "name": "lectio-feedback",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Serverless endpoint that files Lectio in-app feedback as GitHub issues",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  }
+}
