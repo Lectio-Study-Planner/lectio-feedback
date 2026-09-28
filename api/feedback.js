@@ -13,10 +13,25 @@
 //
 // Moved unchanged from masprime77/lectio `api/feedback.js`, except that the
 // target repository now comes from FEEDBACK_REPO.
+//
+// The website's feedback form (Lectio-Study-Planner/lectio-webpage) calls it
+// from a browser too, so the site's origin gets CORS headers and an answer to
+// the preflight. The apps send no Origin and never see either.
 
 const DEFAULT_REPO = 'Lectio-Study-Planner/lectio';
+const ALLOWED_ORIGINS = ['https://lectio-study-planner.github.io'];
 
 export default async function handler(req, res) {
+  if (ALLOWED_ORIGINS.includes(req.headers.origin)) {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Vary', 'Origin');
+    if (req.method === 'OPTIONS') {
+      return res.status(204).end();
+    }
+  }
+
   // POST only.
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });

@@ -14,7 +14,9 @@ Every Lectio generation, at one fixed address:
 - the 1.x desktop app (`packages/desktop/app.js`) and mobile app
   (`packages/mobile/src/lib/feedback.ts`) in `masprime77/lectio`,
 - the 2.x Swift app (`Lectio/Feedback/FeedbackClient.swift` in
-  `Lectio-Study-Planner/lectio`).
+  `Lectio-Study-Planner/lectio`),
+- the website's feedback form (`feedback.html` in
+  `Lectio-Study-Planner/lectio-webpage`), from a browser.
 
 1.x builds are already installed and cannot be updated, so **the address and
 the contract below must not change.** Keep the `lectio-opal` Vercel project and
@@ -37,6 +39,11 @@ Request, `POST` with `Content-Type: application/json`:
 | `version` | string | Written into the footer as `_Lectio v<version>_`; `?` when absent |
 
 Any other key is ignored.
+
+A browser request from an origin in `ALLOWED_ORIGINS` (today only
+`https://lectio-study-planner.github.io`, the website) gets CORS headers, and
+its `OPTIONS` preflight gets a `204`. Every other origin, and the apps, which
+send none, get neither, so their preflight falls through to the `405` below.
 
 Responses:
 
