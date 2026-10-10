@@ -34,11 +34,14 @@ Request, `POST` with `Content-Type: application/json`:
 | Key | Type | Meaning |
 |---|---|---|
 | `type` | string | `"feature"` is labelled `enhancement`; anything else is labelled `bug` |
-| `title` | string | Issue title, trimmed. Required |
-| `body` | string | Issue body, trimmed. Required |
-| `version` | string | Written into the footer as `_Lectio v<version>_`; `?` when absent |
+| `title` | string | Issue title, trimmed, cut to 200 characters. Required |
+| `body` | string | Issue body, trimmed, cut to 10,000 characters. Required |
+| `version` | string | Written into the footer as `_Lectio v<version>_` on one line, cut to 100 characters; `?` when absent |
 
-Any other key is ignored.
+Any other key is ignored, and so is a key whose value is not a string. An
+`@name` in the title or body gets a zero-width space after the `@`, so a report
+cannot notify anyone on GitHub; an `@` inside a word, as in an email address,
+is left alone.
 
 A browser request from an origin in `ALLOWED_ORIGINS` (today only
 `https://lectio-study-planner.github.io`, the website) gets CORS headers, and
@@ -50,9 +53,12 @@ Responses:
 | Status | Body | When |
 |---|---|---|
 | 200 | `{ "ok": true, "url": "<issue html_url>" }` | Issue filed |
-| 400 | `{ "error": "Title and body are required" }` | Blank title or body |
+| 400 | `{ "error": "Title and body are required" }` | Blank, missing or non-string title or body, or no JSON body at all |
 | 405 | `{ "error": "Method not allowed" }` | Not a POST |
-| 502 | `{ "error": "Failed to create issue" }` | GitHub refused the issue |
+| 429 | `{ "error": "Too many reports. Please try again later." }` | More than 5 reports from one address in 10 minutes |
+| 502 | `{ "error": "Failed to create issue" }` | GitHub refused the issue, or could not be reached |
+
+Every app treats any non-2xx as "could not send", so 429 needed no app change.
 
 ## Configuration
 
@@ -72,5 +78,9 @@ The `lectio-opal` Vercel project deploys `main` of this repository. Vercel
 serves `api/feedback.js` as `/api/feedback`; there is no build step and no
 dependencies.
 
-The function has no authentication and no rate limit: anyone who knows the
-address can file an issue.
+The function has no authentication: anyone who knows the address can file an
+issue. Its own rate limit counts per warm instance, so it stops a burst from
+one address but not a flood spread over instances. Add the real limit in the
+Vercel project under Firewall ▸ Rules: a rate-limit rule on path
+`/api/feedback`, for example 10 requests per 10 minutes per IP, with action
+Deny (429).
