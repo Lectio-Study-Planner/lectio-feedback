@@ -25,7 +25,10 @@
 // added 429 needs no app change.
 
 const DEFAULT_REPO = 'Lectio-Study-Planner/lectio';
-const ALLOWED_ORIGINS = ['https://lectio-study-planner.github.io'];
+const ALLOWED_ORIGINS = [
+  'https://lectio.mateoarenas.dev',
+  'https://lectio-study-planner.github.io',
+];
 
 // Caps on what reaches the issue. Longer input is cut, not rejected, so a
 // long report still arrives.
